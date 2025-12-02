@@ -106,6 +106,8 @@ ByteResult fr_peekByte(FileReader* fr)
     return (ByteResult){.byte = fr->buffer[fr->head], .err = Read_Ok};
 }
 
+AllocResult fr_takeLineAlloc(FileReader* fr);
+
 ReadError fr_skip(FileReader* fr, size_t sz)
 {
     for (size_t i = 0; i < sz; i++) {
