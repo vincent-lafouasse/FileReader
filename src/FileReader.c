@@ -5,8 +5,6 @@
 #include <string.h>
 #include <unistd.h>
 
-static const size_t buffer_size = FILE_READER_BUFFER_SIZE;
-
 FileReader fr_open(const char* path)
 {
     const int fd = open(path, O_RDONLY);
@@ -44,7 +42,7 @@ static void fr_reseatHead(FileReader* r)
 static ReadError fr_fillRemaining(FileReader* r)
 {
     const ssize_t bytesRead =
-        read(r->fd, r->buffer + r->len, buffer_size - r->len);
+        read(r->fd, r->buffer + r->len, FILE_READER_BUFFER_SIZE - r->len);
 
     if (bytesRead < 0) {
         return Read_Err;
@@ -58,7 +56,7 @@ static ReadError fr_fillRemaining(FileReader* r)
 
 SliceResult fr_peekSlice(FileReader* fr, size_t sz)
 {
-    assert(sz < buffer_size);
+    assert(sz < FILE_READER_BUFFER_SIZE);
 
     if (fr->len - fr->head < sz) {
         fr_reseatHead(fr);
@@ -99,7 +97,8 @@ ByteResult fr_peekByte(FileReader* fr)
         return (ByteResult){.err = Read_Err};
     }
     if (fr->len == 0 || fr->head == fr->len) {
-        const ssize_t bytesRead = read(fr->fd, fr->buffer, buffer_size);
+        const ssize_t bytesRead =
+            read(fr->fd, fr->buffer, FILE_READER_BUFFER_SIZE);
         if (bytesRead < 0) {
             return (ByteResult){.err = Read_Err};
         } else if (bytesRead == 0) {
@@ -110,8 +109,6 @@ ByteResult fr_peekByte(FileReader* fr)
     }
     return (ByteResult){.byte = fr->buffer[fr->head], .err = Read_Ok};
 }
-
-AllocResult fr_takeLineAlloc(FileReader* fr);
 
 ReadError fr_skip(FileReader* fr, size_t sz)
 {

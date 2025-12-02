@@ -22,6 +22,7 @@ PUBLIC
 target_sources(${PROJECT_NAME}
 PRIVATE
     src/FileReader.c
+    src/takeLine.c
 
 PUBLIC
     FILE_SET myHeaders
