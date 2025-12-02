@@ -8,7 +8,20 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-add_subdirectory(FileReader)
+add_library(${PROJECT_NAME})
+
+target_sources(${PROJECT_NAME}
+PRIVATE
+	src/FileReader.c
+
+PUBLIC
+	FILE_SET myHeaders
+	TYPE HEADERS
+	BASE_DIRS
+		include
+	FILES
+		include/FileReader.h
+)
 
 include(FetchContent)
 include(cmake/fetch_gtest.cmake)

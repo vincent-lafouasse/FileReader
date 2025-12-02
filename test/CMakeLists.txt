@@ -1,4 +1,16 @@
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
+set(testedSourceDir ${CMAKE_SOURCE_DIR}/src)
 
-add_subdirectory(FileReader)
+set(TEST_RUNNER_NAME FileReaderTest)
+
+add_executable(${TEST_RUNNER_NAME})
+target_sources(${TEST_RUNNER_NAME}
+PRIVATE
+	./main.cpp
+	./FileReaderTest.cpp
+)
+
+target_link_libraries(${TEST_RUNNER_NAME}
+PRIVATE
+	gtest
+	FileReader
+)
