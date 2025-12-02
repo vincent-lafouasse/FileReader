@@ -4,3 +4,4 @@ cPlayer
 .idea
 .DS_Store
 *.asd
+Makefile
