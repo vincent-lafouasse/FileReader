@@ -7,6 +7,7 @@ target_sources(${TEST_RUNNER_NAME}
 PRIVATE
 	./main.cpp
 	./FileReaderTest.cpp
+	./TakeLineTest.cpp
 )
 
 target_link_libraries(${TEST_RUNNER_NAME}

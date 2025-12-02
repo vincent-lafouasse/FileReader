@@ -23,27 +23,6 @@ std::string writeTempFile(const std::vector<uint8_t>& data)
     return path;
 }
 
-std::string writeTempFile(const std::string& data)
-{
-    char path[] = "/tmp/fr_testXXXXXX";
-    int fd = mkstemp(path);
-    if (fd < 0) {
-        perror("mkstemp");
-        abort();
-    }
-    write(fd, data.c_str(), data.size());
-    close(fd);
-    return path;
-}
-
-void expectSliceEq(const std::string& expected, const SliceResult& actual)
-{
-    ASSERT_EQ(actual.err, Read_Ok);
-    ASSERT_EQ(actual.len, expected.size());
-    ASSERT_NE(actual.slice, nullptr);
-    ASSERT_EQ(std::memcmp(actual.slice, expected.c_str(), expected.size()), 0);
-}
-
 [[maybe_unused]] void logReader(const FileReader& r)
 {
     std::cerr << std::format("FileReader {{\n");
