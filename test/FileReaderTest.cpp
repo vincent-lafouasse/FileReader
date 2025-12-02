@@ -10,13 +10,6 @@ extern "C" {
 }
 
 namespace {
-void writeData(int fd, const std::vector<uint8_t>& data)
-{
-    const uint8_t* bytes = data.data();
-    const size_t size = data.size();
-    write(fd, bytes, size);
-}
-
 std::string writeTempFile(const std::vector<uint8_t>& data)
 {
     char path[] = "/tmp/fr_testXXXXXX";
@@ -25,7 +18,7 @@ std::string writeTempFile(const std::vector<uint8_t>& data)
         perror("mkstemp");
         abort();
     }
-    writeData(fd, data);
+    write(fd, data.data(), data.size());
     close(fd);
     return path;
 }
