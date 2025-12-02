@@ -23,6 +23,19 @@ std::string writeTempFile(const std::vector<uint8_t>& data)
     return path;
 }
 
+std::string writeTempFile(const std::string& data)
+{
+    char path[] = "/tmp/fr_testXXXXXX";
+    int fd = mkstemp(path);
+    if (fd < 0) {
+        perror("mkstemp");
+        abort();
+    }
+    write(fd, data.c_str(), data.size());
+    close(fd);
+    return path;
+}
+
 [[maybe_unused]] void logReader(const FileReader& r)
 {
     std::cerr << std::format("FileReader {{\n");
@@ -41,7 +54,8 @@ std::string writeTempFile(const std::vector<uint8_t>& data)
 
 TEST(FileReader, OpenClose)
 {
-    auto file = writeTempFile({1, 2, 3});
+    std::vector<uint8_t> data = {1, 2, 3};
+    auto file = writeTempFile(data);
     FileReader fr = fr_open(file.c_str());
     ASSERT_TRUE(fr_isOpened(&fr));
     fr_close(&fr);
@@ -51,7 +65,8 @@ TEST(FileReader, OpenClose)
 // peek doesn't advance, take does
 TEST(FileReader, PeekAndTakeByte)
 {
-    const auto file = writeTempFile({10, 20, 30});
+    std::vector<uint8_t> data = {10, 20, 30};
+    const auto file = writeTempFile(data);
     FileReader fr = fr_open(file.c_str());
 
     // Peek first byte
@@ -93,7 +108,8 @@ TEST(FileReader, PeekAndTakeByte)
 
 TEST(FileReader, PeekAndTakeSlice)
 {
-    auto file = writeTempFile({1, 2, 3, 4});
+    std::vector<uint8_t> data = {1, 2, 3, 4};
+    auto file = writeTempFile(data);
     FileReader fr = fr_open(file.c_str());
 
     // Peek first 3 bytes
@@ -135,7 +151,8 @@ TEST(FileReader, PeekAndTakeSlice)
 // partial slice does not advance
 TEST(FileReader, SlicePartialReadFailsAndDoesNotAdvance)
 {
-    auto file = writeTempFile({6, 7});
+    std::vector<uint8_t> data = {6, 7};
+    auto file = writeTempFile(data);
     FileReader fr = fr_open(file.c_str());
 
     // Try reading 3 bytes but file has only 2
