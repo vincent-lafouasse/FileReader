@@ -36,6 +36,14 @@ std::string writeTempFile(const std::string& data)
     return path;
 }
 
+void expectSliceEq(const std::string& expected, const SliceResult& actual)
+{
+    ASSERT_EQ(actual.err, Read_Ok);
+    ASSERT_EQ(actual.len, expected.size());
+    ASSERT_NE(actual.slice, nullptr);
+    ASSERT_EQ(std::memcmp(actual.slice, expected.c_str(), expected.size()), 0);
+}
+
 [[maybe_unused]] void logReader(const FileReader& r)
 {
     std::cerr << std::format("FileReader {{\n");
