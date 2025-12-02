@@ -25,8 +25,8 @@ std::string writeTempFile(const std::string& data)
 void expectSliceEq(const std::string& expected, const AllocResult& actual)
 {
     ASSERT_EQ(actual.err, Read_Ok);
-    ASSERT_EQ(actual.len, expected.size());
     ASSERT_NE(actual.data, nullptr);
+    ASSERT_EQ(actual.len, expected.size());
     ASSERT_EQ(std::memcmp(actual.data, expected.c_str(), expected.size()), 0);
 }
 }  // namespace
