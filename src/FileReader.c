@@ -11,12 +11,12 @@ FileReader fr_open(const char* path)
 {
     const int fd = open(path, O_RDONLY);
 
-    return (FileReader){.fd = fd, .head = 0, .len = 0};
+    return (FileReader){.fd = fd, .head = 0, .len = 0, .ownsFd = true};
 }
 
 void fr_close(FileReader* fr)
 {
-    if (fr->fd > 2) {
+    if (fr->ownsFd && fr->fd > 2) {
         close(fr->fd);
     }
     fr->fd = -1;
@@ -25,6 +25,11 @@ void fr_close(FileReader* fr)
 bool fr_isOpened(const FileReader* fr)
 {
     return fr && fr->fd != -1;
+}
+
+FileReader fr_fromFd(int fd)
+{
+    return (FileReader){.fd = fd, .head = 0, .len = 0, .ownsFd = false};
 }
 
 static void fr_reseatHead(FileReader* r)

@@ -40,9 +40,11 @@ typedef struct {
     uint8_t buffer[FILE_READER_BUFFER_SIZE];
     size_t head;
     size_t len;
+    bool ownsFd;
 } FileReader;
 
 FileReader fr_open(const char* path);
+FileReader fr_fromFd(int fd);  // fr_close is a no-op on borrowed fds
 void fr_close(FileReader* fr);
 bool fr_isOpened(const FileReader* fr);
 
