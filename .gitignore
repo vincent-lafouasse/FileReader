@@ -1,0 +1,6 @@
+build/
+cPlayer
+.cache
+.idea
+.DS_Store
+*.asd
