@@ -55,7 +55,7 @@ static ReadStatus bv_push(ByteVector* vec, uint8_t value)
     return ReadStatus_Ok;
 }
 
-AllocResult fr_takeLineAlloc(FileReader* fr)
+AllocResult fr_takeUntilAlloc(FileReader* fr, bool (*predicate)(uint8_t))
 {
     ReadStatus status = ReadStatus_Ok;
     ByteVector line = bv_new();
@@ -79,7 +79,7 @@ AllocResult fr_takeLineAlloc(FileReader* fr)
             goto out;
         }
 
-        if (byte.byte == '\n') {
+        if (predicate(byte.byte)) {
             break;
         }
     }
@@ -91,4 +91,14 @@ out:
         line.len = 0;
     }
     return (AllocResult){.data = line.data, .len = line.len, .status = status};
+}
+
+static bool isNewline(uint8_t byte)
+{
+    return byte == '\n';
+}
+
+AllocResult fr_takeLineAlloc(FileReader* fr)
+{
+    return fr_takeUntilAlloc(fr, isNewline);
 }

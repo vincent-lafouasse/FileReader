@@ -54,5 +54,6 @@ SliceResult fr_peekSlice(FileReader* fr, size_t sz);
 SliceResult fr_takeSlice(FileReader* fr, size_t sz);
 
 AllocResult fr_takeLineAlloc(FileReader* fr);
+AllocResult fr_takeUntilAlloc(FileReader* fr, bool (*predicate)(uint8_t));
 
 ReadStatus fr_skip(FileReader* fr, size_t sz);
