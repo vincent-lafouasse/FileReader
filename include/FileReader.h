@@ -23,7 +23,7 @@ typedef struct {
 } ByteResult;
 
 typedef struct {
-    uint8_t* slice;
+    const uint8_t* slice;
     size_t len;
     ReadStatus status;
 } SliceResult;

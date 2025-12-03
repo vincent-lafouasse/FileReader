@@ -101,7 +101,7 @@ TEST(FileReader, PeekAndTakeSlice)
 
     // Peek first 3 bytes
     SliceResult maybeSlice = fr_peekSlice(&fr, 3);
-    uint8_t* slice = maybeSlice.slice;
+    const uint8_t* slice = maybeSlice.slice;
     assert(maybeSlice.status == ReadStatus_Ok);
     EXPECT_EQ(slice[0], 1);
     EXPECT_EQ(slice[1], 2);
