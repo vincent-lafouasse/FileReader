@@ -14,7 +14,7 @@ static ByteVector bv_new(void)
     return (ByteVector){.data = NULL, .len = 0, .cap = 0};
 }
 
-static const float growingFactor = 1.5;
+static const float growingFactor = 1.5f;
 static const size_t initialCapacity = 64;
 
 static ReadStatus bv_grow(ByteVector* vec)
