@@ -12,6 +12,7 @@ typedef enum {
     Read_Ok,
     Read_Err,
     Read_EOF,
+    Read_OOM,
 } ReadError;
 
 const char* readErrorRepr(ReadError rr);
