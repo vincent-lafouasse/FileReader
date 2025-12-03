@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// cmake should provide the buffer size
+// or you do it
 #ifndef FILE_READER_BUFFER_SIZE
 #error "no buffer size"
 #endif
@@ -20,8 +22,6 @@ typedef struct {
     ReadStatus status;
 } ByteResult;
 
-// yes SliceResult and AllocResult are functionally identical but the semantics
-// of .slice vs .data reinforces that the slice does not own the data
 typedef struct {
     uint8_t* slice;
     size_t len;
