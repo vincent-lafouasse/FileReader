@@ -5,3 +5,4 @@ cPlayer
 .DS_Store
 *.asd
 Makefile
+cmake-build/
