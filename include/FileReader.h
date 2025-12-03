@@ -50,9 +50,12 @@ bool fr_isOpened(const FileReader* fr);
 ByteResult fr_peekByte(FileReader* fr);
 ByteResult fr_takeByte(FileReader* fr);
 
+// returns a slice to the internal buffer
+// the slice might be invalidated by another call to read
 SliceResult fr_peekSlice(FileReader* fr, size_t sz);
 SliceResult fr_takeSlice(FileReader* fr, size_t sz);
 
+// you own this, don't lose it
 AllocResult fr_takeLineAlloc(FileReader* fr);
 AllocResult fr_takeUntilAlloc(FileReader* fr, bool (*predicate)(uint8_t));
 
