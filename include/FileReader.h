@@ -15,8 +15,6 @@ typedef enum {
     ReadStatus_OOM,
 } ReadStatus;
 
-const char* readErrorRepr(ReadStatus rr);
-
 typedef struct {
     uint8_t byte;
     ReadStatus status;

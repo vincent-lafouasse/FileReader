@@ -121,16 +121,3 @@ ReadStatus fr_skip(FileReader* fr, size_t sz)
     }
     return ReadStatus_Ok;
 }
-
-const char* rr_repr(ReadStatus rr)
-{
-    switch (rr) {
-        case ReadStatus_Ok:
-            return "Ok";
-        case ReadStatus_ReadErr:
-            return "Err";
-        case ReadStatus_EOF:
-            return "EOF";
-    }
-    return NULL;
-}
