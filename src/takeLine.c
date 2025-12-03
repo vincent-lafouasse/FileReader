@@ -3,22 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static uint8_t* newStringFromSlice(const uint8_t* data, size_t size)
-{
-    if (!data || !size) {
-        return NULL;
-    }
-
-    uint8_t* out = malloc(size + 1);
-    if (!out) {
-        return NULL;
-    }
-
-    memcpy(out, data, size);
-    out[size] = 0;
-    return out;
-}
-
 typedef struct {
     uint8_t* data;
     size_t len;
