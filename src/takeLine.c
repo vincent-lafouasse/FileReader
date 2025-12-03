@@ -76,9 +76,16 @@ AllocResult fr_takeLineAlloc(FileReader* fr)
     ReadError err = Read_Ok;
     ByteVector line = bv_new();
 
+    if (fr_peekByte(fr).err == Read_EOF) {
+        err = Read_EOF;
+        goto out;
+    }
+
     while (1) {
         ByteResult byte = fr_takeByte(fr);
-        if (byte.err != Read_Ok) {
+        if (byte.err == Read_EOF) {
+            break;
+        } else if (byte.err != Read_Ok) {
             err = byte.err;
             goto out;
         }
@@ -93,16 +100,11 @@ AllocResult fr_takeLineAlloc(FileReader* fr)
         }
     }
 
-    err = bv_push(&line, '\0');
-    if (err != Read_Ok) {
-        goto out;
-    }
-
 out:
     if (err != Read_Ok) {
         free(line.data);
         line.data = NULL;
         line.len = 0;
     }
-    return (AllocResult){.data = line.data, .len = line.len - 1, .err = err};
+    return (AllocResult){.data = line.data, .len = line.len, .err = err};
 }
