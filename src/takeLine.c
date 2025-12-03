@@ -17,15 +17,15 @@ static ByteVector bv_new(void)
 static const float growingFactor = 1.5;
 static const size_t initialCapacity = 64;
 
-static ReadError bv_grow(ByteVector* vec)
+static ReadStatus bv_grow(ByteVector* vec)
 {
     if (vec->cap == 0) {
         vec->data = malloc(initialCapacity);
         vec->cap = initialCapacity;
         if (!vec->data) {
-            return Read_OOM;
+            return ReadStatus_OOM;
         } else {
-            return Read_Ok;
+            return ReadStatus_Ok;
         }
     }
 
@@ -33,49 +33,49 @@ static ReadError bv_grow(ByteVector* vec)
     const size_t newCapacity = (size_t)rawCapacity;
     uint8_t* newBuffer = malloc(newCapacity);
     if (!newBuffer) {
-        return Read_OOM;
+        return ReadStatus_OOM;
     }
     memcpy(newBuffer, vec->data, vec->len);
     vec->cap = newCapacity;
     free(vec->data);
     vec->data = newBuffer;
-    return Read_Ok;
+    return ReadStatus_Ok;
 }
 
-static ReadError bv_push(ByteVector* vec, uint8_t value)
+static ReadStatus bv_push(ByteVector* vec, uint8_t value)
 {
     if (vec->len == vec->cap) {
-        ReadError err = bv_grow(vec);
-        if (err != Read_Ok) {
-            return err;
+        ReadStatus status = bv_grow(vec);
+        if (status != ReadStatus_Ok) {
+            return status;
         }
     }
 
     vec->data[vec->len++] = value;
-    return Read_Ok;
+    return ReadStatus_Ok;
 }
 
 AllocResult fr_takeLineAlloc(FileReader* fr)
 {
-    ReadError err = Read_Ok;
+    ReadStatus status = ReadStatus_Ok;
     ByteVector line = bv_new();
 
-    if (fr_peekByte(fr).err == Read_EOF) {
-        err = Read_EOF;
+    if (fr_peekByte(fr).status == ReadStatus_EOF) {
+        status = ReadStatus_EOF;
         goto out;
     }
 
     while (1) {
         ByteResult byte = fr_takeByte(fr);
-        if (byte.err == Read_EOF) {
+        if (byte.status == ReadStatus_EOF) {
             break;
-        } else if (byte.err != Read_Ok) {
-            err = byte.err;
+        } else if (byte.status != ReadStatus_Ok) {
+            status = byte.status;
             goto out;
         }
 
-        err = bv_push(&line, byte.byte);
-        if (err != Read_Ok) {
+        status = bv_push(&line, byte.byte);
+        if (status != ReadStatus_Ok) {
             goto out;
         }
 
@@ -85,10 +85,10 @@ AllocResult fr_takeLineAlloc(FileReader* fr)
     }
 
 out:
-    if (err != Read_Ok) {
+    if (status != ReadStatus_Ok) {
         free(line.data);
         line.data = NULL;
         line.len = 0;
     }
-    return (AllocResult){.data = line.data, .len = line.len, .err = err};
+    return (AllocResult){.data = line.data, .len = line.len, .status = status};
 }

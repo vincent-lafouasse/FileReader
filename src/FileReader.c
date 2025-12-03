@@ -39,19 +39,19 @@ static void fr_reseatHead(FileReader* r)
     r->len = newLen;
 }
 
-static ReadError fr_fillRemaining(FileReader* r)
+static ReadStatus fr_fillRemaining(FileReader* r)
 {
     const ssize_t bytesRead =
         read(r->fd, r->buffer + r->len, FILE_READER_BUFFER_SIZE - r->len);
 
     if (bytesRead < 0) {
-        return Read_Err;
+        return ReadStatus_ReadErr;
     } else if (bytesRead == 0) {
-        return Read_EOF;
+        return ReadStatus_EOF;
     }
 
     r->len += bytesRead;
-    return Read_Ok;
+    return ReadStatus_Ok;
 }
 
 SliceResult fr_peekSlice(FileReader* fr, size_t sz)
@@ -60,23 +60,24 @@ SliceResult fr_peekSlice(FileReader* fr, size_t sz)
 
     if (fr->len - fr->head < sz) {
         fr_reseatHead(fr);
-        const ReadError err = fr_fillRemaining(fr);
-        if (err != Read_Ok) {
-            return (SliceResult){.err = err};
+        const ReadStatus status = fr_fillRemaining(fr);
+        if (status != ReadStatus_Ok) {
+            return (SliceResult){.status = status};
         }
     }
     if (fr->len < sz) {
-        return (SliceResult){.err = Read_Err};
+        return (SliceResult){.status = ReadStatus_ReadErr};
     }
 
     // a correct read is assured here
-    return (SliceResult){.slice = fr->buffer + fr->head, .err = Read_Ok};
+    return (SliceResult){.slice = fr->buffer + fr->head,
+                         .status = ReadStatus_Ok};
 }
 
 SliceResult fr_takeSlice(FileReader* fr, size_t sz)
 {
     const SliceResult maybeSlice = fr_peekSlice(fr, sz);
-    if (maybeSlice.err == Read_Ok) {
+    if (maybeSlice.status == ReadStatus_Ok) {
         fr->head += sz;
     }
     return maybeSlice;
@@ -85,7 +86,7 @@ SliceResult fr_takeSlice(FileReader* fr, size_t sz)
 ByteResult fr_takeByte(FileReader* fr)
 {
     const ByteResult maybeByte = fr_peekByte(fr);
-    if (maybeByte.err == Read_Ok) {
+    if (maybeByte.status == ReadStatus_Ok) {
         fr->head += 1;
     }
     return maybeByte;
@@ -94,41 +95,41 @@ ByteResult fr_takeByte(FileReader* fr)
 ByteResult fr_peekByte(FileReader* fr)
 {
     if (fr == NULL) {
-        return (ByteResult){.err = Read_Err};
+        return (ByteResult){.status = ReadStatus_ReadErr};
     }
     if (fr->len == 0 || fr->head == fr->len) {
         const ssize_t bytesRead =
             read(fr->fd, fr->buffer, FILE_READER_BUFFER_SIZE);
         if (bytesRead < 0) {
-            return (ByteResult){.err = Read_Err};
+            return (ByteResult){.status = ReadStatus_ReadErr};
         } else if (bytesRead == 0) {
-            return (ByteResult){.err = Read_EOF};
+            return (ByteResult){.status = ReadStatus_EOF};
         }
         fr->len = bytesRead;
         fr->head = 0;
     }
-    return (ByteResult){.byte = fr->buffer[fr->head], .err = Read_Ok};
+    return (ByteResult){.byte = fr->buffer[fr->head], .status = ReadStatus_Ok};
 }
 
-ReadError fr_skip(FileReader* fr, size_t sz)
+ReadStatus fr_skip(FileReader* fr, size_t sz)
 {
     for (size_t i = 0; i < sz; i++) {
         const ByteResult maybeByte = fr_takeByte(fr);
-        if (maybeByte.err != Read_Ok) {
-            return maybeByte.err;
+        if (maybeByte.status != ReadStatus_Ok) {
+            return maybeByte.status;
         }
     }
-    return Read_Ok;
+    return ReadStatus_Ok;
 }
 
-const char* rr_repr(ReadError rr)
+const char* rr_repr(ReadStatus rr)
 {
     switch (rr) {
-        case Read_Ok:
+        case ReadStatus_Ok:
             return "Ok";
-        case Read_Err:
+        case ReadStatus_ReadErr:
             return "Err";
-        case Read_EOF:
+        case ReadStatus_EOF:
             return "EOF";
     }
     return NULL;

@@ -9,17 +9,17 @@
 #endif
 
 typedef enum {
-    Read_Ok,
-    Read_Err,
-    Read_EOF,
-    Read_OOM,
-} ReadError;
+    ReadStatus_Ok,
+    ReadStatus_ReadErr,
+    ReadStatus_EOF,
+    ReadStatus_OOM,
+} ReadStatus;
 
-const char* readErrorRepr(ReadError rr);
+const char* readErrorRepr(ReadStatus rr);
 
 typedef struct {
     uint8_t byte;
-    ReadError err;
+    ReadStatus status;
 } ByteResult;
 
 // yes SliceResult and AllocResult are functionally identical but the semantics
@@ -27,13 +27,13 @@ typedef struct {
 typedef struct {
     uint8_t* slice;
     size_t len;
-    ReadError err;
+    ReadStatus status;
 } SliceResult;
 
 typedef struct {
     uint8_t* data;
     size_t len;
-    ReadError err;
+    ReadStatus status;
 } AllocResult;
 
 typedef struct {
@@ -57,4 +57,4 @@ SliceResult fr_takeSlice(FileReader* fr, size_t sz);
 
 AllocResult fr_takeLineAlloc(FileReader* fr);
 
-ReadError fr_skip(FileReader* fr, size_t sz);
+ReadStatus fr_skip(FileReader* fr, size_t sz);
