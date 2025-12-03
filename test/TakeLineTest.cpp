@@ -32,11 +32,41 @@ void expectSliceEq(const std::string& expected, const AllocResult& actual)
 }
 }  // namespace
 
-TEST(TakeLine, Simple)
+TEST(TakeLineAlloc, SingleLineWithNewline)
 {
-    const std::vector<std::string> lines = {
-        "aaa\n",
-    };
+    const std::vector<std::string> lines = {"hello\n"};
+    auto file = writeTempFile(
+        std::accumulate(lines.begin(), lines.end(), std::string("")));
+    FileReader fr = fr_open(file.c_str());
+
+    AllocResult actual = fr_takeLineAlloc(&fr);
+    expectSliceEq(lines[0], actual);
+    free(actual.data);
+
+    AllocResult eof = fr_takeLineAlloc(&fr);
+    ASSERT_EQ(eof.err, Read_EOF);
+    fr_close(&fr);
+}
+
+TEST(TakeLineAlloc, SingleLineNoNewline)
+{
+    const std::vector<std::string> lines = {"hello"};
+    auto file = writeTempFile(
+        std::accumulate(lines.begin(), lines.end(), std::string("")));
+    FileReader fr = fr_open(file.c_str());
+
+    AllocResult actual = fr_takeLineAlloc(&fr);
+    expectSliceEq(lines[0], actual);
+    free(actual.data);
+
+    AllocResult eof = fr_takeLineAlloc(&fr);
+    ASSERT_EQ(eof.err, Read_EOF);
+    fr_close(&fr);
+}
+
+TEST(TakeLineAlloc, MultipleLines)
+{
+    const std::vector<std::string> lines = {"a\n", "bb\n", "ccc\n"};
     auto file = writeTempFile(
         std::accumulate(lines.begin(), lines.end(), std::string("")));
     FileReader fr = fr_open(file.c_str());
@@ -47,5 +77,76 @@ TEST(TakeLine, Simple)
         free(actual.data);
     }
 
+    AllocResult eof = fr_takeLineAlloc(&fr);
+    ASSERT_EQ(eof.err, Read_EOF);
+    fr_close(&fr);
+}
+
+TEST(TakeLineAlloc, EmptyFile)
+{
+    auto file = writeTempFile("");
+    FileReader fr = fr_open(file.c_str());
+
+    AllocResult actual = fr_takeLineAlloc(&fr);
+    ASSERT_EQ(actual.err, Read_EOF);
+    ASSERT_EQ(actual.data, nullptr);
+    ASSERT_EQ(actual.len, 0u);
+
+    fr_close(&fr);
+}
+
+TEST(TakeLineAlloc, EmptyLineAtStart)
+{
+    const std::vector<std::string> lines = {"\n", "hello\n"};
+    auto file = writeTempFile(
+        std::accumulate(lines.begin(), lines.end(), std::string("")));
+    FileReader fr = fr_open(file.c_str());
+
+    for (const std::string& expected : lines) {
+        AllocResult actual = fr_takeLineAlloc(&fr);
+        expectSliceEq(expected, actual);
+        free(actual.data);
+    }
+
+    AllocResult eof = fr_takeLineAlloc(&fr);
+    ASSERT_EQ(eof.err, Read_EOF);
+    fr_close(&fr);
+}
+
+// -------------------
+// Very long line (multiple heap grows and reads)
+// -------------------
+TEST(TakeLineAlloc, LongLine)
+{
+    const size_t bigLen = std::max(5000, 3 * FILE_READER_BUFFER_SIZE / 2);
+    std::string longLine(bigLen, 'x');
+    longLine.push_back('\n');
+    auto file = writeTempFile(longLine);
+    FileReader fr = fr_open(file.c_str());
+
+    AllocResult actual = fr_takeLineAlloc(&fr);
+    expectSliceEq(longLine, actual);
+    free(actual.data);
+
+    AllocResult eof = fr_takeLineAlloc(&fr);
+    ASSERT_EQ(eof.err, Read_EOF);
+    fr_close(&fr);
+}
+
+TEST(TakeLineAlloc, ConsecutiveEmptyLines)
+{
+    const std::vector<std::string> lines = {"\n", "\n", "\n"};
+    auto file = writeTempFile(
+        std::accumulate(lines.begin(), lines.end(), std::string("")));
+    FileReader fr = fr_open(file.c_str());
+
+    for (const std::string& expected : lines) {
+        AllocResult actual = fr_takeLineAlloc(&fr);
+        expectSliceEq(expected, actual);
+        free(actual.data);
+    }
+
+    AllocResult eof = fr_takeLineAlloc(&fr);
+    ASSERT_EQ(eof.err, Read_EOF);
     fr_close(&fr);
 }
