@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <cstring>
+#include <numeric>
 
 #include "gtest/gtest.h"
 
@@ -33,11 +34,14 @@ void expectSliceEq(const std::string& expected, const AllocResult& actual)
 
 TEST(TakeLine, Simple)
 {
-    auto file = writeTempFile("aaa\n");
+    const std::vector<std::string> lines = {
+        "aaa\n",
+    };
+    auto file = writeTempFile(
+        std::accumulate(lines.begin(), lines.end(), std::string("")));
     FileReader fr = fr_open(file.c_str());
 
-    std::vector<std::string> expectedData = {"aaa\n"};
-    for (const std::string& expected : expectedData) {
+    for (const std::string& expected : lines) {
         AllocResult actual = fr_takeLineAlloc(&fr);
         expectSliceEq(expected, actual);
         free(actual.data);
