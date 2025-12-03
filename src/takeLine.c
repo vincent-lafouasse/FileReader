@@ -25,10 +25,15 @@ typedef struct {
     size_t cap;
 } ByteVector;
 
+static ByteVector bv_new(void)
+{
+    return (ByteVector){.data = NULL, .len = 0, .cap = 0};
+}
+
 static const float growingFactor = 1.5;
 static const size_t initialCapacity = 64;
 
-ReadError bv_grow(ByteVector* vec)
+static ReadError bv_grow(ByteVector* vec)
 {
     if (vec->cap == 0) {
         vec->data = malloc(initialCapacity);
@@ -53,7 +58,7 @@ ReadError bv_grow(ByteVector* vec)
     return Read_Ok;
 }
 
-ReadError bv_push(ByteVector* vec, uint8_t value)
+static ReadError bv_push(ByteVector* vec, uint8_t value)
 {
     if (vec->len == vec->cap) {
         ReadError err = bv_grow(vec);
@@ -68,11 +73,36 @@ ReadError bv_push(ByteVector* vec, uint8_t value)
 
 AllocResult fr_takeLineAlloc(FileReader* fr)
 {
-    AllocResult out = {.data = NULL, .len = 0, .err = Read_Ok};
+    ReadError err = Read_Ok;
+    ByteVector line = bv_new();
+
+    while (1) {
+        ByteResult byte = fr_takeByte(fr);
+        if (byte.err != Read_Ok) {
+            err = byte.err;
+            goto out;
+        }
+
+        err = bv_push(&line, byte.byte);
+        if (err != Read_Ok) {
+            goto out;
+        }
+
+        if (byte.byte == '\n') {
+            break;
+        }
+    }
+
+    err = bv_push(&line, '\0');
+    if (err != Read_Ok) {
+        goto out;
+    }
 
 out:
-    if (out.err != Read_Ok) {
-        free(out.data);
+    if (err != Read_Ok) {
+        free(line.data);
+        line.data = NULL;
+        line.len = 0;
     }
-    return out;
+    return (AllocResult){.data = line.data, .len = line.len - 1, .err = err};
 }
