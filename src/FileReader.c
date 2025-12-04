@@ -70,8 +70,8 @@ SliceResult fr_peekSlice(FileReader* fr, size_t sz)
     }
 
     // a correct read is assured here
-    return (SliceResult){.slice = fr->buffer + fr->head,
-                         .status = ReadStatus_Ok};
+    return (SliceResult){
+        .slice = fr->buffer + fr->head, .len = sz, .status = ReadStatus_Ok};
 }
 
 SliceResult fr_takeSlice(FileReader* fr, size_t sz)
