@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -60,3 +64,7 @@ AllocResult fr_takeLineAlloc(FileReader* fr);
 AllocResult fr_takeUntilAlloc(FileReader* fr, bool (*predicate)(uint8_t));
 
 ReadStatus fr_skip(FileReader* fr, size_t sz);
+
+#ifdef __cplusplus
+}
+#endif
