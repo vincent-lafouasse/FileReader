@@ -9,29 +9,27 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 if(NOT DEFINED FILE_READER_BUFFER_SIZE)
-    set(FILE_READER_BUFFER_SIZE "4096" CACHE STRING "Internal stack buffer size for FileReader")
+  set(FILE_READER_BUFFER_SIZE
+      "4096"
+      CACHE STRING "Internal stack buffer size for FileReader")
 endif()
 
 add_library(${PROJECT_NAME})
 
-target_compile_definitions(${PROJECT_NAME}
-PUBLIC
-    FILE_READER_BUFFER_SIZE=${FILE_READER_BUFFER_SIZE}
-)
+target_compile_definitions(
+  ${PROJECT_NAME} PUBLIC FILE_READER_BUFFER_SIZE=${FILE_READER_BUFFER_SIZE})
 
-target_sources(${PROJECT_NAME}
-PRIVATE
-    src/FileReader.c
-    src/takeLine.c
-
-PUBLIC
-    FILE_SET myHeaders
-    TYPE HEADERS
-    BASE_DIRS
-        include
-    FILES
-        include/FileReader.h
-)
+target_sources(
+  ${PROJECT_NAME}
+  PRIVATE src/FileReader.c src/takeLine.c
+  PUBLIC FILE_SET
+         myHeaders
+         TYPE
+         HEADERS
+         BASE_DIRS
+         include
+         FILES
+         include/FileReader.h)
 
 include(FetchContent)
 include(cmake/fetch_gtest.cmake)
@@ -40,6 +38,4 @@ add_subdirectory(test)
 include(CTest)
 enable_testing()
 
-add_test(NAME FileReaderTest
-    COMMAND FileReaderTest
-)
+add_test(NAME FileReaderTest COMMAND FileReaderTest)
