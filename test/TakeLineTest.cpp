@@ -25,7 +25,7 @@ std::string writeTempFile(const std::string& data)
 
 void expectSliceEq(const std::string& expected, const AllocResult& actual)
 {
-    ASSERT_EQ(actual.status, ReadStatus_Ok);
+    ASSERT_EQ(actual.status, FileReader_ReadStatus_Ok);
     ASSERT_NE(actual.data, nullptr);
     ASSERT_EQ(actual.len, expected.size());
     ASSERT_EQ(std::memcmp(actual.data, expected.c_str(), expected.size()), 0);
@@ -44,7 +44,7 @@ TEST(TakeLineAlloc, SingleLineWithNewline)
     free(actual.data);
 
     AllocResult eof = fr_takeLineAlloc(&fr);
-    ASSERT_EQ(eof.status, ReadStatus_EOF);
+    ASSERT_EQ(eof.status, FileReader_ReadStatus_EOF);
     fr_close(&fr);
 }
 
@@ -60,7 +60,7 @@ TEST(TakeLineAlloc, SingleLineNoNewline)
     free(actual.data);
 
     AllocResult eof = fr_takeLineAlloc(&fr);
-    ASSERT_EQ(eof.status, ReadStatus_EOF);
+    ASSERT_EQ(eof.status, FileReader_ReadStatus_EOF);
     fr_close(&fr);
 }
 
@@ -78,7 +78,7 @@ TEST(TakeLineAlloc, MultipleLines)
     }
 
     AllocResult eof = fr_takeLineAlloc(&fr);
-    ASSERT_EQ(eof.status, ReadStatus_EOF);
+    ASSERT_EQ(eof.status, FileReader_ReadStatus_EOF);
     fr_close(&fr);
 }
 
@@ -88,7 +88,7 @@ TEST(TakeLineAlloc, EmptyFile)
     FileReader fr = fr_open(file.c_str());
 
     AllocResult actual = fr_takeLineAlloc(&fr);
-    ASSERT_EQ(actual.status, ReadStatus_EOF);
+    ASSERT_EQ(actual.status, FileReader_ReadStatus_EOF);
     ASSERT_EQ(actual.data, nullptr);
     ASSERT_EQ(actual.len, 0u);
 
@@ -109,7 +109,7 @@ TEST(TakeLineAlloc, EmptyLineAtStart)
     }
 
     AllocResult eof = fr_takeLineAlloc(&fr);
-    ASSERT_EQ(eof.status, ReadStatus_EOF);
+    ASSERT_EQ(eof.status, FileReader_ReadStatus_EOF);
     fr_close(&fr);
 }
 
@@ -129,7 +129,7 @@ TEST(TakeLineAlloc, LongLine)
     free(actual.data);
 
     AllocResult eof = fr_takeLineAlloc(&fr);
-    ASSERT_EQ(eof.status, ReadStatus_EOF);
+    ASSERT_EQ(eof.status, FileReader_ReadStatus_EOF);
     fr_close(&fr);
 }
 
@@ -147,6 +147,6 @@ TEST(TakeLineAlloc, ConsecutiveEmptyLines)
     }
 
     AllocResult eof = fr_takeLineAlloc(&fr);
-    ASSERT_EQ(eof.status, ReadStatus_EOF);
+    ASSERT_EQ(eof.status, FileReader_ReadStatus_EOF);
     fr_close(&fr);
 }

@@ -59,36 +59,36 @@ TEST(FileReader, PeekAndTakeByte)
     // Peek first byte
     ByteResult maybeByte = fr_peekByte(&fr);
     uint8_t expected = 10;
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, expected);
 
     // Peek again: should still be 10
     maybeByte = fr_peekByte(&fr);
     expected = 10;
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, expected);
 
     // Take now
     maybeByte = fr_takeByte(&fr);
     expected = 10;
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, expected);
 
     // Next byte is 20
     maybeByte = fr_takeByte(&fr);
     expected = 20;
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, expected);
 
     // Next is 30
     maybeByte = fr_takeByte(&fr);
     expected = 30;
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, expected);
 
     // Now EOF
-    EXPECT_EQ(fr_peekByte(&fr).status, ReadStatus_EOF);
-    EXPECT_EQ(fr_takeByte(&fr).status, ReadStatus_EOF);
+    EXPECT_EQ(fr_peekByte(&fr).status, FileReader_ReadStatus_EOF);
+    EXPECT_EQ(fr_takeByte(&fr).status, FileReader_ReadStatus_EOF);
 
     fr_close(&fr);
 }
@@ -102,14 +102,14 @@ TEST(FileReader, PeekAndTakeSlice)
     // Peek first 3 bytes
     SliceResult maybeSlice = fr_peekSlice(&fr, 3);
     const uint8_t* slice = maybeSlice.slice;
-    assert(maybeSlice.status == ReadStatus_Ok);
+    assert(maybeSlice.status == FileReader_ReadStatus_Ok);
     EXPECT_EQ(slice[0], 1);
     EXPECT_EQ(slice[1], 2);
     EXPECT_EQ(slice[2], 3);
 
     // Peek again — still same
     maybeSlice = fr_peekSlice(&fr, 3);
-    assert(maybeSlice.status == ReadStatus_Ok);
+    assert(maybeSlice.status == FileReader_ReadStatus_Ok);
     slice = maybeSlice.slice;
     EXPECT_EQ(slice[0], 1);
     EXPECT_EQ(slice[1], 2);
@@ -117,7 +117,7 @@ TEST(FileReader, PeekAndTakeSlice)
 
     // Take 3 bytes
     maybeSlice = fr_takeSlice(&fr, 3);
-    assert(maybeSlice.status == ReadStatus_Ok);
+    assert(maybeSlice.status == FileReader_ReadStatus_Ok);
     slice = maybeSlice.slice;
     EXPECT_EQ(slice[0], 1);
     EXPECT_EQ(slice[1], 2);
@@ -125,12 +125,12 @@ TEST(FileReader, PeekAndTakeSlice)
 
     // 1 byte left
     ByteResult maybeByte = fr_takeByte(&fr);
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, 4);
 
     // EOF
-    EXPECT_EQ(fr_peekSlice(&fr, 1).status, ReadStatus_EOF);
-    EXPECT_EQ(fr_takeSlice(&fr, 1).status, ReadStatus_EOF);
+    EXPECT_EQ(fr_peekSlice(&fr, 1).status, FileReader_ReadStatus_EOF);
+    EXPECT_EQ(fr_takeSlice(&fr, 1).status, FileReader_ReadStatus_EOF);
 
     fr_close(&fr);
 }
@@ -143,26 +143,26 @@ TEST(FileReader, SlicePartialReadFailsAndDoesNotAdvance)
     FileReader fr = fr_open(file.c_str());
 
     // Try reading 3 bytes but file has only 2
-    EXPECT_EQ(fr_peekSlice(&fr, 3).status, ReadStatus_ReadErr);
+    EXPECT_EQ(fr_peekSlice(&fr, 3).status, FileReader_ReadStatus_ReadErr);
 
     // Ensure buffer hasn't advanced: peek a byte -> should be 9
     ByteResult maybeByte = fr_peekByte(&fr);
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, 6);
 
     // take a byte, ensure it's still 9
     maybeByte = fr_takeByte(&fr);
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, 6);
 
     // now only 1 byte remains
     maybeByte = fr_takeByte(&fr);
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, 7);
 
     // EOF
-    EXPECT_EQ(fr_peekSlice(&fr, 1).status, ReadStatus_EOF);
-    EXPECT_EQ(fr_peekSlice(&fr, 67).status, ReadStatus_EOF);
+    EXPECT_EQ(fr_peekSlice(&fr, 1).status, FileReader_ReadStatus_EOF);
+    EXPECT_EQ(fr_peekSlice(&fr, 67).status, FileReader_ReadStatus_EOF);
 
     fr_close(&fr);
 }
@@ -182,7 +182,7 @@ TEST(FileReader, SliceCrossesBufferBoundary)
     // Move head to sz - 2
     for (size_t i = 0; i < sz - 2; i++) {
         const ByteResult maybeByte = fr_takeByte(&fr);
-        EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+        EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
         EXPECT_EQ(maybeByte.byte, data[i]);
     }
 
@@ -190,19 +190,19 @@ TEST(FileReader, SliceCrossesBufferBoundary)
     // Request a slice of 6 bytes => must cross the boundary.
     const SliceResult maybeSlice = fr_takeSlice(&fr, 6);
     const uint8_t* expectedValues = data.data() + sz - 2;
-    EXPECT_EQ(maybeSlice.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeSlice.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(memcmp(maybeSlice.slice, expectedValues, 6), 0);
 
     // Now 1 byte should remain (the last element in data)
     const ByteResult last = fr_takeByte(&fr);
-    EXPECT_EQ(last.status, ReadStatus_Ok);
+    EXPECT_EQ(last.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(last.byte, data.back());
 
     // EOF
-    EXPECT_EQ(fr_peekSlice(&fr, 1).status, ReadStatus_EOF);
-    EXPECT_EQ(fr_peekSlice(&fr, 67).status, ReadStatus_EOF);
-    EXPECT_EQ(fr_peekByte(&fr).status, ReadStatus_EOF);
-    EXPECT_EQ(fr_takeByte(&fr).status, ReadStatus_EOF);
+    EXPECT_EQ(fr_peekSlice(&fr, 1).status, FileReader_ReadStatus_EOF);
+    EXPECT_EQ(fr_peekSlice(&fr, 67).status, FileReader_ReadStatus_EOF);
+    EXPECT_EQ(fr_peekByte(&fr).status, FileReader_ReadStatus_EOF);
+    EXPECT_EQ(fr_takeByte(&fr).status, FileReader_ReadStatus_EOF);
 
     fr_close(&fr);
 }
@@ -221,14 +221,14 @@ TEST(FileReader, CrossingPartialSliceFailsAndDoesNotAdvance)
     FileReader fr = fr_open(file.c_str());
 
     // Advance near end: leave only 3 bytes remaining
-    EXPECT_EQ(fr_skip(&fr, data.size() - 3), ReadStatus_Ok);
+    EXPECT_EQ(fr_skip(&fr, data.size() - 3), FileReader_ReadStatus_Ok);
 
     // Try reading 6 bytes, but only 3 remain in the whole file
-    EXPECT_EQ(fr_peekSlice(&fr, 6).status, ReadStatus_ReadErr);
+    EXPECT_EQ(fr_peekSlice(&fr, 6).status, FileReader_ReadStatus_ReadErr);
 
     // Reader must NOT advance
     const ByteResult maybeByte = fr_takeByte(&fr);
-    EXPECT_EQ(maybeByte.status, ReadStatus_Ok);
+    EXPECT_EQ(maybeByte.status, FileReader_ReadStatus_Ok);
     EXPECT_EQ(maybeByte.byte, data[data.size() - 3]);
 
     fr_close(&fr);

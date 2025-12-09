@@ -15,27 +15,27 @@ extern "C" {
 #endif
 
 typedef enum {
-    ReadStatus_Ok,
-    ReadStatus_ReadErr,
-    ReadStatus_EOF,
-    ReadStatus_OOM,
-} ReadStatus;
+    FileReader_ReadStatus_Ok,
+    FileReader_ReadStatus_ReadErr,
+    FileReader_ReadStatus_EOF,
+    FileReader_ReadStatus_OOM,
+} FileReader_ReadStatus;
 
 typedef struct {
     uint8_t byte;
-    ReadStatus status;
+    FileReader_ReadStatus status;
 } ByteResult;
 
 typedef struct {
     const uint8_t* slice;
     size_t len;
-    ReadStatus status;
+    FileReader_ReadStatus status;
 } SliceResult;
 
 typedef struct {
     uint8_t* data;
     size_t len;
-    ReadStatus status;
+    FileReader_ReadStatus status;
 } AllocResult;
 
 typedef struct {
@@ -63,7 +63,7 @@ SliceResult fr_takeSlice(FileReader* fr, size_t sz);
 AllocResult fr_takeLineAlloc(FileReader* fr);
 AllocResult fr_takeUntilAlloc(FileReader* fr, bool (*predicate)(uint8_t));
 
-ReadStatus fr_skip(FileReader* fr, size_t sz);
+FileReader_ReadStatus fr_skip(FileReader* fr, size_t sz);
 
 #ifdef __cplusplus
 }
