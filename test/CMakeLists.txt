@@ -7,3 +7,5 @@ target_sources(${TEST_RUNNER_NAME} PRIVATE ./main.cpp ./FileReaderTest.cpp
                                            ./TakeLineTest.cpp)
 
 target_link_libraries(${TEST_RUNNER_NAME} PRIVATE gtest FileReader)
+
+add_test(NAME ${TEST_RUNNER_NAME} COMMAND ${TEST_RUNNER_NAME})

@@ -28,10 +28,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC ./include)
 if(FILE_READER_BUILD_TESTS)
     include(FetchContent)
     include(cmake/fetch_gtest.cmake)
-    add_subdirectory(test)
 
     include(CTest)
     enable_testing()
 
-    add_test(NAME FileReaderTest COMMAND FileReaderTest)
+    add_subdirectory(test)
 endif()
