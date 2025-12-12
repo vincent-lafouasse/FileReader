@@ -8,6 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+option(FILE_READER_BUILD_TESTS "Build and run tests using CTest" ON)
+
 if(NOT DEFINED FILE_READER_BUFFER_SIZE)
   set(FILE_READER_BUFFER_SIZE
       "4096"
@@ -23,11 +25,13 @@ target_sources(${PROJECT_NAME} PRIVATE src/FileReader.c src/takeLine.c)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ./include)
 
-include(FetchContent)
-include(cmake/fetch_gtest.cmake)
-add_subdirectory(test)
+if(FILE_READER_BUILD_TESTS)
+    include(FetchContent)
+    include(cmake/fetch_gtest.cmake)
+    add_subdirectory(test)
 
-include(CTest)
-enable_testing()
+    include(CTest)
+    enable_testing()
 
-add_test(NAME FileReaderTest COMMAND FileReaderTest)
+    add_test(NAME FileReaderTest COMMAND FileReaderTest)
+endif()
