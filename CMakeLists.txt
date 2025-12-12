@@ -19,17 +19,9 @@ add_library(${PROJECT_NAME})
 target_compile_definitions(
   ${PROJECT_NAME} PUBLIC FILE_READER_BUFFER_SIZE=${FILE_READER_BUFFER_SIZE})
 
-target_sources(
-  ${PROJECT_NAME}
-  PRIVATE src/FileReader.c src/takeLine.c
-  PUBLIC FILE_SET
-         myHeaders
-         TYPE
-         HEADERS
-         BASE_DIRS
-         include
-         FILES
-         include/FileReader.h)
+target_sources(${PROJECT_NAME} PRIVATE src/FileReader.c src/takeLine.c)
+
+target_include_directories(${PROJECT_NAME} PUBLIC ./include)
 
 include(FetchContent)
 include(cmake/fetch_gtest.cmake)
